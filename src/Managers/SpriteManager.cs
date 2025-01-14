@@ -1,21 +1,22 @@
-﻿using Directer_Machine.FileModels;
+﻿using System.Diagnostics.CodeAnalysis;
+using Directer_Machine.FileModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Directer_Machine.Managers
 {
-    internal class CharacterManager : BaseManager
+    internal class SpriteManager : BaseManager
     {
-        internal CharacterManager(string CharacterPath, BaseManager baseManager)
+        internal SpriteManager(string SpritePath, BaseManager baseManager)
         {
-            this.CharacterPath = CharacterPath;
+            this.SpritePath = SpritePath;
             _BaseManager = baseManager;
-            ParseCharacterFiles();
+            ParseSprites();
         }
 
-        void ParseCharacterFiles()
+        void ParseSprites()
         {
-            foreach (string dir in Directory.GetDirectories(CharacterPath))
+            foreach (string dir in Directory.GetDirectories(SpritePath))
             {
                 var files = Directory.GetFiles(dir, "*.json");
                 if (files.Length == 0)
@@ -27,7 +28,7 @@ namespace Directer_Machine.Managers
 
                 if (!File.Exists(jsonFile)) continue;
 
-                GetLogger().Msg($"Loading character from {Path.GetDirectoryName(dir)}");
+                GetLogger().Msg($"Loading Sprite Data from {Path.GetDirectoryName(dir)}");
                 string fileContent = File.ReadAllText(jsonFile);
                 HandleJsonFileString(fileContent, jsonFile);
             }
@@ -35,14 +36,20 @@ namespace Directer_Machine.Managers
 
         void HandleJsonFileString(string json, string filePath)
         {
-            BaseCharacterFileModel CharacterData = GetFileData(json, filePath, out Type actualType);
+#pragma warning disable S1481
+            BaseSpriteFileModel SpriteData = GetFileData(json, filePath, out Type actualType);
+#pragma warning restore S1481
 
-            _BaseManager.Characters.Add(CharacterData.GetCharacter());
+            SpriteData.GetSpriteList().ForEach(data =>
+            {
+                data.BaseDirectory = Path.GetDirectoryName(filePath);
+                _BaseManager.Sprites.Add(data);
+            });
         }
 
-        BaseCharacterFileModel GetFileData(string json, string filePath, out Type actualType)
+        BaseSpriteFileModel GetFileData(string json, string filePath, out Type actualType)
         {
-            JObject jsonObj = new JObject();
+            JObject jsonObj;
 
             try
             {
@@ -57,15 +64,15 @@ namespace Directer_Machine.Managers
                 throw new InvalidDataException("Failed to parse json to JObject", ex);
             }
 
-            JToken? jToken = jsonObj["version"] ?? throw new InvalidDataException("Invalid json provided, no version string.");
-            Version? version = jToken.ToObject<Version>();
+            var jToken = jsonObj[propertyName: "version"] ?? throw new InvalidDataException("Invalid json provided, no version string.");
+            var version = jToken.ToObject<Version>();
 
             switch (version?.ToString())
             {
-                case CharacterFileModelV1._version:
+                case SpriteFileModelV1._version:
                     {
-                        actualType = typeof(CharacterFileModelV1);
-                        CharacterFileModelV1? c = JsonConvert.DeserializeObject<CharacterFileModelV1>(json);
+                        actualType = typeof(SpriteFileModelV1);
+                        var c = JsonConvert.DeserializeObject<SpriteFileModelV1>(json);
 
                         if (c == null)
                         {

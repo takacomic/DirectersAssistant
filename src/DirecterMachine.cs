@@ -1,4 +1,5 @@
 ﻿using Directer_Machine.Managers;
+using Directer_Machine.PatchFarm;
 using MelonLoader;
 
 namespace Directer_Machine
@@ -10,12 +11,14 @@ namespace Directer_Machine
         public const string Author = "Takacomic";
         public const string Company = "CorruptedInfluences";
         public const string Version = "0.0.1";
-        public const string Download = "https://github.com/takacomic/Directer'sMachine/latest";
+        public const string Download = "https://github.com/takacomic/DirectersMachine/latest";
     }
     internal class DirecterMachineMod : MelonMod
     {
         private static readonly string ModDirectory = Path.Combine(Directory.GetCurrentDirectory(), "UserData", "DirectersMachine");
         private static readonly string DataDirectory = Path.Combine(ModDirectory, "data");
+        internal BaseManager? BaseManager;
+        internal BasePatch? BasePatch;
         public override void OnInitializeMelon()
         {
             if (!Directory.Exists(ModDirectory))
@@ -23,7 +26,8 @@ namespace Directer_Machine
                 Directory.CreateDirectory(ModDirectory);
                 Directory.CreateDirectory(DataDirectory);
             }
-            BaseManager baseManager = new(ModDirectory, DataDirectory);
+            BaseManager = new(ModDirectory, DataDirectory);
+            BasePatch = new ();
         }
     }
 }

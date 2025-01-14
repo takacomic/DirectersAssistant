@@ -1,63 +1,78 @@
-﻿using HarmonyLib.Tools;
+﻿using System.IO.Compression;
+using Directer_Machine.DataModels;
+using Il2CppVampireSurvivors.Data;
 using MelonLoader;
-using System;
-using System.Collections.Generic;
-using System.IO.Compression;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Directer_Machine.Managers
 {
     internal class BaseManager
     {
-        internal MelonLogger.Instance logger = Melon<DirecterMachineMod>.Logger;
-        readonly string ZipPath;
-        readonly string DataPath;
-        readonly string SavePackPath;
-        readonly string CharacterPath;
-        readonly string SpritePath;
-        readonly string MusicPath;
-        readonly string WeaponPath;
-        readonly string ArcanaPath;
+        internal List<CharacterDataModelWrapper> Characters { get; set; } = new();
+        internal Dictionary<CharacterType, CharacterDataModelWrapper> CharacterDict { get; set; } = new();
+
+        internal List<SpriteDataModelWrapper> Sprites { get; set; } = new();
+
+        internal static MelonLogger.Instance GetLogger() => Melon<DirecterMachineMod>.Logger;
+        readonly string ZipPath = null!;
+        readonly string DataPath = null!;
+        readonly string SavePackPath = null!;
+        internal string CharacterPath = null!;
+        internal string SpritePath = null!;
+        internal string MusicPath = null!;
+        internal string WeaponPath = null!;
+        internal string ArcanaPath = null!;
         public readonly bool BaseSuccess;
-        private BaseManager(string ZipPath, string DataPath)
+
+        internal CharacterManager CharacterManager = null!;
+        internal SpriteManager SpriteManager = null!;
+        internal BaseManager _BaseManager = null!;
+        internal BaseManager(string ZipPath, string DataPath)
         {
             this.ZipPath = ZipPath;
             this.DataPath = DataPath;
-            this.SavePackPath = Path.Combine(DataPath, "Installed Packs");
-            this.CharacterPath = Path.Combine(DataPath, "Characters");
-            this.SpritePath = Path.Combine(DataPath, "Sprites");
-            this.MusicPath = Path.Combine(DataPath, "Music");
-            this.WeaponPath = Path.Combine(DataPath, "Weapons");
-            this.ArcanaPath = Path.Combine(DataPath, "Arcana");
+            SavePackPath = Path.Combine(DataPath, "Installed Packs");
+            CharacterPath = Path.Combine(DataPath, "Characters");
+            SpritePath = Path.Combine(DataPath, "Sprites");
+            MusicPath = Path.Combine(DataPath, "Music");
+            WeaponPath = Path.Combine(DataPath, "Weapons");
+            ArcanaPath = Path.Combine(DataPath, "Arcana");
+            _BaseManager = this;
 
             try
             {
-                CreateInitDirectories()
+                CreateInitDirectories();
                 ParseZipFiles();
-                this.BaseSuccess = true;
+                BaseSuccess = true;
             }
             catch
             {
-                this.BaseSuccess = false;
+                BaseSuccess = false;
             }
+            SpriteManager = new SpriteManager(SpritePath, _BaseManager);
+            CharacterManager = new CharacterManager(CharacterPath, _BaseManager);
         }
+
+        protected BaseManager()
+        {
+        }
+
         void CreateInitDirectories()
         {
-            List<string> directories = new List<string>() { this.SavePackPath, this.CharacterPath, this.SpritePath,
-                this.MusicPath, this.WeaponPath, this.ArcanaPath };
+            List<string> directories = new List<string> { SavePackPath, CharacterPath, SpritePath,
+                MusicPath, WeaponPath, ArcanaPath };
 
             foreach (string dir in directories)
             {
                 CreateDirectory(dir);
             }
         }
-        void CreateDirectory(string directory)
+
+        static void CreateDirectory(string directory)
         {
             if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
         }
-        void EmptyDir(string directory)
+
+        static bool EmptyDir(string directory)
         {
             return !Directory.EnumerateFileSystemEntries(directory).Any();
         }
@@ -72,12 +87,12 @@ namespace Directer_Machine.Managers
                 {
                     try
                     {
-                        this.logger.Msg($"Parsing {Path.GetFileName(zip)}");
+                        GetLogger().Msg($"Parsing {Path.GetFileName(zip)}");
                         handleZipFile(zip);
                     }
                     catch
                     {
-                        this.logger.Error($"Failed to extract zip file: '{zip}'");
+                        GetLogger().Error($"Failed to extract zip file: '{zip}'");
                     }
                 }
             }
@@ -87,96 +102,95 @@ namespace Directer_Machine.Managers
             List<string> filesToClean = new();
             try
             {
-                string jsonString;
-
-                using (FileStream fileStream = File.OpenRead(filePath))
-                using (ZipArchive zipArchive = new (fileStream, ZipArchiveMode.Read))
+                using FileStream fileStream = File.OpenRead(filePath);
+                using ZipArchive zipArchive = new (fileStream, ZipArchiveMode.Read);
+                foreach (ZipArchiveEntry entry in zipArchive.Entries)
                 {
-                    foreach (ZipArchiveEntry entry in zipArchive.Entries)
+                    if (entry.FullName.EndsWith('/'))
                     {
-                        if (entry.FullName.EndsWith('/'))
+                        string[] dir = entry.FullName.Split('/');
+                        string outputDir = Path.Combine(DataPath, dir[0], dir[1]);
+                        if (dir[0] != "")
                         {
-                            string[] dir = entry.FullName.Split('/');
-                            string outputDir = Path.Combine(this.DataPath, dir[0], dir[1]);
-                            if (dir[0] != "")
+                            if (Directory.Exists(outputDir))
                             {
-                                if (Directory.Exists(outputDir))
+                                GetLogger().Warning($"Output directory '{outputDir}' already exists");
+                                if (!EmptyDir(outputDir))
                                 {
-                                    this.logger.Warning($"Output directory '{outputDir}' already exists");
-                                    if (!EmptyDir(outputDir))
-                                    {
-                                        this.logger.Warning($"Output directory '{outputDir}' is not empty. Is this the same character?");
-                                    }
-                                }
-                                else
-                                {
-                                    CreateDirectory(outputDir);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (entry.Name.EndsWith(".json"))
-                            {
-                                entry.ExtractToFile(Path.Combine(this.DataPath, entry.FullName));
-                                filesToClean.Add(Path.Combine(this.DataPath, entry.FullName));
-                            }
-                            else if (entry.Name.EndsWith(".png"))
-                            {
-                                try
-                                {
-                                    // Don't overwrite output for now.
-                                    entry.ExtractToFile(imageFilePath, false);
-                                    filesToClean.Add(imageFilePath);
-                                }
-                                catch (IOException ioe)
-                                {
-                                    this.logger
-                                        .Error($"Error: {imageFilePath} already exists. Are you trying to reimport the same character?");
-
-                                    throw;
-                                }
-                                catch (Exception e)
-                                {
-                                    this.logger
-                                        .Error($"Error: Unexpected error while extracting image {entry.Name} from zip file. {e}");
-
-                                    throw;
+                                    GetLogger().Warning($"Output directory '{outputDir}' is not empty. Is this the same character?");
                                 }
                             }
                             else
                             {
-                                this.logger.Warning($"Found invalid file: '{entry.FullName}', ignored.")
+                                CreateDirectory(outputDir);
                             }
+                        }
+                    }
+                    else
+                    {
+                        if (entry.Name.EndsWith(".json"))
+                        {
+                            entry.ExtractToFile(Path.Combine(DataPath, entry.FullName));
+                            filesToClean.Add(Path.Combine(DataPath, entry.FullName));
+                        }
+                        else if (entry.Name.EndsWith(".png"))
+                        {
+                            string imageFilePath = Path.Combine(DataPath, entry.Name);
+                            try
+                            {
+                                // Don't overwrite output for now.
+                                entry.ExtractToFile(imageFilePath, false);
+                                filesToClean.Add(imageFilePath);
+                            }
+#pragma warning disable CS0168 // Variable is declared but never used
+                            catch (IOException ioe)
+#pragma warning restore CS0168 // Variable is declared but never used
+                            {
+                                GetLogger()
+                                    .Error($"Error: {imageFilePath} already exists. Are you trying to reimport the same character?");
+
+                                throw;
+                            }
+                            catch (Exception e)
+                            {
+                                GetLogger()
+                                    .Error($"Error: Unexpected error while extracting image {entry.Name} from zip file. {e}");
+
+                                throw;
+                            }
+                        }
+                        else
+                        {
+                            GetLogger().Warning($"Found invalid file: '{entry.FullName}', ignored.");
                         }
                     }
                 }
             }
             catch (FileNotFoundException exception)
             {
-                this.logger
-                    .Error($"Error: File did not exist. Do you have permission to access the directory?");
+                GetLogger()
+                    .Error("Error: File did not exist. Do you have permission to access the directory?");
 
-                this.logger.Error($"Skipping file: {filePath} - {exception}");
+                GetLogger().Error($"Skipping file: {filePath} - {exception}");
                 CleanupFiles(filesToClean);
                 return;
             }
             catch (Exception e)
             {
-                this.logger.Error($"Copy and paste the following exception to new issue on github.");
-                this.logger.Error($"Caught unexpected exception: {e}");
+                GetLogger().Error("Copy and paste the following exception to new issue on github.");
+                GetLogger().Error($"Caught unexpected exception: {e}");
                 CleanupFiles(filesToClean);
                 throw;
             }
 
-            this.logger
+            GetLogger()
                 .Msg($"Extraction of {Path.GetFileNameWithoutExtension(filePath)} successful. Deleting zip file.");
 
-            CleanupFiles(new List<string>() { filePath });
+            CleanupFiles(new List<string> { filePath });
         }
         void CleanupFiles(List<string> filesToClean)
         {
-            foreach (string file in filesToClean.Where(file => File.Exists(file)))
+            foreach (string file in filesToClean.Where(File.Exists))
             {
                 try
                 {
@@ -184,7 +198,7 @@ namespace Directer_Machine.Managers
                 }
                 catch (Exception e)
                 {
-                    this.logger.Error($"An error occured trying to clean up '{file}': {e}\n***** Manually clean up this file *****")
+                    GetLogger().Error($"An error occured trying to clean up '{file}': {e}\n***** Manually clean up this file *****");
                 }
             }
         }
@@ -193,7 +207,7 @@ namespace Directer_Machine.Managers
             if (File.Exists(filePath))
             {
                 string fileName = Path.GetFileName(filePath);
-                string newFilePath = GetUnusedName(Path.Combine(this.SavePackPath, fileName), 0);
+                string newFilePath = GetUnusedName(Path.Combine(SavePackPath, fileName), 0);
 
                 File.Move(filePath, newFilePath);
             }
