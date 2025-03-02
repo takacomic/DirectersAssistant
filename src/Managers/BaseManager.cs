@@ -1,22 +1,28 @@
 ﻿using System.IO.Compression;
-using Directer_Machine.DataModels;
+using Directers_Cut.DataModels;
 using Il2CppVampireSurvivors.Data;
+using Il2CppVampireSurvivors.Framework;
 using MelonLoader;
 
-namespace Directer_Machine.Managers
+namespace Directers_Cut.Managers
 {
     internal class BaseManager
     {
         internal List<CharacterDataModelWrapper> Characters { get; set; } = new();
         internal Dictionary<CharacterType, CharacterDataModelWrapper> CharacterDict { get; set; } = new();
+        internal Dictionary<string, CharacterType> CharacterID2Type { get; set; } = new();
 
         internal List<SpriteDataModelWrapper> Sprites { get; set; } = new();
 
-        internal static MelonLogger.Instance GetLogger() => Melon<DirecterMachineMod>.Logger;
+        internal List<MusicDataModelWrapper> Music { get; set; } = new();
+        internal Dictionary<BgmType, MusicDataModelWrapper> MusicDict { get; set; } = new();
+        internal Dictionary<string, BgmType> MusicID2Type { get; set; } = new();
+
+        internal static MelonLogger.Instance GetLogger() => Melon<DirecterAssistantMod>.Logger;
         readonly string ZipPath = null!;
         readonly string DataPath = null!;
         readonly string SavePackPath = null!;
-        internal string CharacterPath = null!;
+        internal string CharacterPath;
         internal string SpritePath = null!;
         internal string MusicPath = null!;
         internal string WeaponPath = null!;
@@ -24,6 +30,7 @@ namespace Directer_Machine.Managers
         public readonly bool BaseSuccess;
 
         internal CharacterManager CharacterManager = null!;
+        internal MusicManager MusicManager = null!;
         internal SpriteManager SpriteManager = null!;
         internal BaseManager _BaseManager = null!;
         internal BaseManager(string ZipPath, string DataPath)
@@ -31,9 +38,9 @@ namespace Directer_Machine.Managers
             this.ZipPath = ZipPath;
             this.DataPath = DataPath;
             SavePackPath = Path.Combine(DataPath, "Installed Packs");
-            CharacterPath = Path.Combine(DataPath, "Characters");
+            CharacterPath = Path.Combine(DataPath, "Bloodlines");
             SpritePath = Path.Combine(DataPath, "Sprites");
-            MusicPath = Path.Combine(DataPath, "Music");
+            MusicPath = Path.Combine(DataPath, "Blackdisk");
             WeaponPath = Path.Combine(DataPath, "Weapons");
             ArcanaPath = Path.Combine(DataPath, "Arcana");
             _BaseManager = this;
@@ -49,7 +56,8 @@ namespace Directer_Machine.Managers
                 BaseSuccess = false;
             }
             SpriteManager = new SpriteManager(SpritePath, _BaseManager);
-            CharacterManager = new CharacterManager(CharacterPath, _BaseManager);
+            MusicManager = new MusicManager(MusicPath, _BaseManager);
+            CharacterManager = new CharacterManager(CharacterPath, _BaseManager, SpriteManager);
         }
 
         protected BaseManager()
@@ -59,7 +67,7 @@ namespace Directer_Machine.Managers
         void CreateInitDirectories()
         {
             List<string> directories = new List<string> { SavePackPath, CharacterPath, SpritePath,
-                MusicPath, WeaponPath, ArcanaPath };
+                MusicPath/*, WeaponPath, ArcanaPath*/ };
 
             foreach (string dir in directories)
             {
@@ -102,6 +110,7 @@ namespace Directer_Machine.Managers
             List<string> filesToClean = new();
             try
             {
+                string zipName = Path.GetFileNameWithoutExtension(filePath);
                 using FileStream fileStream = File.OpenRead(filePath);
                 using ZipArchive zipArchive = new (fileStream, ZipArchiveMode.Read);
                 foreach (ZipArchiveEntry entry in zipArchive.Entries)
@@ -128,14 +137,31 @@ namespace Directer_Machine.Managers
                     }
                     else
                     {
-                        if (entry.Name.EndsWith(".json"))
+                        if (entry.Name.EndsWith(".json") || entry.Name.EndsWith(".mp3") || entry.Name.EndsWith(".ogg"))
                         {
-                            entry.ExtractToFile(Path.Combine(DataPath, entry.FullName));
-                            filesToClean.Add(Path.Combine(DataPath, entry.FullName));
+                            if(!entry.FullName.Contains('/'))
+                            {
+                                // For Bloodlines Characters
+                                CreateDirectory(Path.Combine(CharacterPath, zipName));
+                                entry.ExtractToFile(Path.Combine(CharacterPath, zipName, entry.Name));
+                                filesToClean.Add(Path.Combine(CharacterPath, zipName, entry.Name));
+                            }
+                            else
+                            {
+                                entry.ExtractToFile(Path.Combine(DataPath, entry.FullName));
+                                filesToClean.Add(Path.Combine(DataPath, entry.FullName));
+                            }
                         }
                         else if (entry.Name.EndsWith(".png"))
                         {
-                            string imageFilePath = Path.Combine(DataPath, entry.Name);
+                            string imageFilePath = Path.Combine(DataPath, entry.FullName);
+                            if (!entry.FullName.Contains('/'))
+                            {
+                                // For Bloodlines Characters
+                                CreateDirectory(Path.Combine(SpritePath, zipName));
+                                imageFilePath = Path.Combine(SpritePath, zipName, entry.Name);
+                            }
+
                             try
                             {
                                 // Don't overwrite output for now.

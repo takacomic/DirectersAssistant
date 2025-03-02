@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Directer_Machine.DataModels
+namespace Directers_Cut.DataModels
 {
     internal class SpriteDataModelWrapper
     {

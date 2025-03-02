@@ -1,4 +1,7 @@
-﻿using Directer_Machine.Managers;
+﻿using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+using Directers_Cut.Managers;
+using Il2CppSystem.Runtime.Remoting.Messaging;
 using Il2CppVampireSurvivors.Data;
 using Il2CppVampireSurvivors.Framework;
 using Il2CppVampireSurvivors.Objects.Characters;
@@ -6,7 +9,7 @@ using Il2CppVampireSurvivors.Objects;
 using MelonLoader;
 using Newtonsoft.Json;
 
-namespace Directer_Machine.PatchFarm
+namespace Directers_Cut.PatchFarm
 {
 #pragma warning disable S1118
     internal class BasePatch
@@ -17,29 +20,30 @@ namespace Directer_Machine.PatchFarm
             NullValueHandling = NullValueHandling.Ignore
         };
 
-        internal static MelonLogger.Instance GetLogger() => Melon<DirecterMachineMod>.Logger;
-        internal static BaseManager? GetManager() => Melon<DirecterMachineMod>.Instance.BaseManager;
-        internal static GameManager? GameManager;
+        internal static MelonLogger.Instance GetLogger() => Melon<DirecterAssistantMod>.Logger;
+        internal static BaseManager? GetManager() => Melon<DirecterAssistantMod>.Instance.BaseManager;
+        internal static GameManager? _GameManager;
+
+        internal static BasePatch? GetBasePatch() => Melon<DirecterAssistantMod>.Instance.BasePatch;
+        internal static SkinType _skinType;
 
         internal static bool IsCustomCharacter(CharacterType characterType)
         {
             return GetManager()!.CharacterDict.ContainsKey(characterType);
         }
 
-        internal static void HiddenWeaponLeveler(WeaponType weaponType, CharacterController characterController, bool allowMulti)
+        internal static void HiddenWeaponLeveler(WeaponType weaponType, CharacterController characterController, bool allowMulti = false)
         {
             if (AlreadyHiddenWeapon(weaponType, characterController) && !allowMulti)
                 foreach (Equipment equipment in characterController.WeaponsManager.HiddenEquipment)
                 {
-                    if (equipment.Type == weaponType)
-                    {
-                        equipment.LevelUp(true);
-                    }
-
+                    if (equipment.Type != weaponType) continue;
+                    equipment.LevelUp(true);
                     break;
+
                 }
             else
-                GameManager!.AddHiddenWeapon(weaponType, characterController);
+                _GameManager!.AddHiddenWeapon(weaponType, characterController, allowMulti);
         }
         internal static bool AlreadyHiddenWeapon(WeaponType weaponType, CharacterController characterController)
         {
@@ -51,8 +55,8 @@ namespace Directer_Machine.PatchFarm
         }
         internal static void ArcanaAdder(ArcanaType arcanaType)
         {
-            GameManager!.ArcanaManager.ActiveArcanas.Add(arcanaType);
-            GameManager.ArcanaManager.TriggerArcana(arcanaType);
+            _GameManager!.ArcanaManager.ActiveArcanas.Add(arcanaType);
+            _GameManager.ArcanaManager.TriggerArcana(arcanaType);
         }
     }
 }

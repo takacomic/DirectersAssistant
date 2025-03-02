@@ -1,18 +1,22 @@
-﻿using Directer_Machine.DataModels;
-using Il2CppVampireSurvivors.Data;
+﻿using Il2CppVampireSurvivors.Data;
 using Il2CppVampireSurvivors.Data.Characters;
 using Il2CppVampireSurvivors.Objects;
 using Newtonsoft.Json;
 using System.Reflection;
+using Directers_Cut.DataModels;
+using MelonLoader;
 using UnityEngine;
 
-namespace Directer_Machine.JsonModels
+namespace Directers_Cut.JsonModels
 {
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     internal class CharacterJsonModelV1
     {
         [JsonProperty("isBought")]
         public bool IsBought { get; set; }
+
+        [JsonProperty("internalID")]
+        public string InternalID { get; set; }
 
         [JsonProperty("statModifiers")]
         public List<StatModifierJsonModelV1>? StatModifiers { get; set; }
@@ -35,8 +39,11 @@ namespace Directer_Machine.JsonModels
         [JsonProperty("customPortrait")]
         public string? CustomPortrait { get; set; }
 
+        [JsonProperty("customBgm")]
+        public string? CustomBgm { get; set; }
+
         [JsonProperty("dlcSort")]
-        public DlcType? DlcSort { get; set; }
+        public DlcType? DlcSort { get; set; } = (DlcType)10000;
 
         [JsonProperty("description")]
         public string? Description { get; set; }
@@ -178,6 +185,12 @@ namespace Directer_Machine.JsonModels
                         break;
                 }
             }
+
+            foreach (SkinObjectModelV1 skin in Skins)
+            {
+                modelWrapper.CharacterSkinIndices.Add(skin.SkinType, modelWrapper.CharacterSkinIndices.Count);
+            }
+
             return modelWrapper;
         }
     }
@@ -340,8 +353,14 @@ namespace Directer_Machine.JsonModels
         [JsonProperty("hiddenWeapons")]
         public List<WeaponType> HiddenWeapons { get; set; } = new ();
 
+        [JsonProperty("killCount")]
+        public int KillCount { get; set; }
+
         [JsonProperty("level")]
         public int Level { get; set; }
+
+        [JsonProperty("timer")]
+        public int Timer { get; set; }
 
         [JsonProperty("arcana")]
         public List<ArcanaType> Arcana { get; set; } = new ();
