@@ -1,4 +1,4 @@
-﻿using Directer_Machine;
+﻿using Directers_Cut;
 using MelonLoader;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -11,8 +11,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark(ModInfo.Company)]
 [assembly: AssemblyVersion(ModInfo.Version)]
 [assembly: AssemblyFileVersion(ModInfo.Version)]
-[assembly: MelonInfo(typeof(DirecterMachineMod), ModInfo.Name, ModInfo.Version, ModInfo.Author, ModInfo.Download)]
+[assembly: MelonInfo(typeof(DirecterAssistantMod), ModInfo.Name, ModInfo.Version, ModInfo.Author, ModInfo.Download)]
 [assembly: MelonGame("poncle", "Vampire Survivors")]
 [assembly: ComVisible(false)]
+[assembly: MelonAdditionalDependencies("AudioImportLib")]
 
 [assembly: Guid("8c8346d7-68ba-469e-9d87-bd4bac7fdb3d")]

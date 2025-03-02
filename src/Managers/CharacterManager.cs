@@ -1,14 +1,16 @@
-﻿using Directer_Machine.FileModels;
+﻿using Directers_Cut.FileModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Directer_Machine.Managers
+namespace Directers_Cut.Managers
 {
     internal class CharacterManager : BaseManager
     {
-        internal CharacterManager(string CharacterPath, BaseManager baseManager)
+        bool SpriteRetrigger = false;
+        internal CharacterManager(string CharacterPath, BaseManager baseManager, SpriteManager spriteManager)
         {
             this.CharacterPath = CharacterPath;
+            this.SpriteManager = spriteManager;
             _BaseManager = baseManager;
             ParseCharacterFiles();
         }
@@ -31,6 +33,7 @@ namespace Directer_Machine.Managers
                 string fileContent = File.ReadAllText(jsonFile);
                 HandleJsonFileString(fileContent, jsonFile);
             }
+            if (this.SpriteRetrigger) SpriteManager.ParseSprites();
         }
 
         void HandleJsonFileString(string json, string filePath)
@@ -74,11 +77,43 @@ namespace Directer_Machine.Managers
 
                         return c;
                     }
+                case "0.3":
+                    {
+                        this.SpriteRetrigger = true;
+
+                        actualType = typeof(CharacterFileModelV1);
+                        CharacterFileModelV1? c = JsonConvert.DeserializeObject<CharacterFileModelV1>(characterFromBloodlines(json, filePath));
+
+                        if (c == null)
+                        {
+                            break;
+                        }
+
+                        return c;
+                    }
                 default:
                     throw new InvalidDataException($"Invalid version number found in json string {(version == null ? "null" : version.ToString())} in <{filePath}>.");
             }
-
             throw new InvalidDataException($"Invalid Json object in file <{filePath}>");
+        }
+
+        string characterFromBloodlines(string json, string filePath)
+        {
+            string spritePath = filePath.Split("Bloodlines")[0] + "Sprites" + filePath.Split("Bloodlines")[1];
+            JObject modifyJson = JObject.Parse(json);
+            JObject modifyCharacter = new JObject();
+            JObject modifySprites = new JObject();
+
+            modifyCharacter.Add("version", "1.0");
+            modifySprites.Add("version", "1.0");
+
+            modifyCharacter.Add("character", modifyJson["characters"][0]);
+            modifySprites.Add("sprites", modifyJson["spriteData"]);
+
+            File.WriteAllText(filePath, modifyCharacter.ToString());
+            File.WriteAllText(spritePath, modifySprites.ToString());
+
+            return JsonConvert.SerializeObject(modifyCharacter);
         }
     }
 }

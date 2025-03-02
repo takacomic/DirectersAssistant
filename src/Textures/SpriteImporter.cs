@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Directer_Machine.Textures
+namespace Directers_Cut.Textures
 {
     internal class SpriteImporter : MonoBehaviour
     {

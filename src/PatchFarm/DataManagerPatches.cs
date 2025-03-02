@@ -1,21 +1,27 @@
-﻿using Directer_Machine.DataModels;
-using Directer_Machine.Textures;
+﻿using System.Collections;
+using System.Data;
+using Directers_Cut.DataModels;
+using Directers_Cut.Textures;
 using HarmonyLib;
+using Il2CppDarkTonic.MasterAudio;
 using Il2CppNewtonsoft.Json.Linq;
 using Il2CppSystem.Reflection;
 using Il2CppVampireSurvivors.App.Data;
 using Il2CppVampireSurvivors.Data;
+using Il2CppVampireSurvivors.Framework;
+using MelonLoader;
 using UnityEngine;
 using SpriteManager = Il2CppVampireSurvivors.Graphics.SpriteManager;
 
 #pragma warning disable S1118
 #pragma warning disable S3398
 
-namespace Directer_Machine.PatchFarm
+namespace Directers_Cut.PatchFarm
 {
     internal class DataManagerPatches : BasePatch
     {
         internal static int CharacterIDs { get; private set; } = 10000;
+        internal static int MusicIDs { get; private set; } = 10000;
 
         [HarmonyPatch(typeof(DataManager))]
         class DataManagerPatch
@@ -25,6 +31,7 @@ namespace Directer_Machine.PatchFarm
             static void LoadBaseJObjects_Postfix(DataManager __instance, object[] __args, MethodBase __originalMethod)
             {
                 SpriteRegister();
+                if(Melon<DirecterAssistantMod>.Instance.AudioImport) MusicRegister(__instance);
                 CharacterRegister(__instance, (DlcType) 10000, null!);
             }
 
@@ -62,6 +69,10 @@ namespace Directer_Machine.PatchFarm
                 if (dlcType != character.DlcSort) continue;
                 CharacterType characterType = (CharacterType)CharacterIDs++;
                 characterWrapper.CharacterType = characterType;
+                if (Melon<DirecterAssistantMod>.Instance.AudioImport && character.BGM == null && character.CustomBgm != null)
+                {
+                    character.BGM = GetManager()!.MusicID2Type[character.CustomBgm];
+                }
 
                 GetLogger().Msg($"Adding character... {characterType} {character.CharName}");
                 string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(characterWrapper.CharacterSettings,
@@ -69,16 +80,55 @@ namespace Directer_Machine.PatchFarm
                     SerializerSettings);
 
                 JArray json = JArray.Parse(jsonString);
-                if (settings != null)
+
+                if (settings != null && character.DlcSort == dlcType)
                 {
                     JObject dlc = JObject.Parse(settings._CharacterDataJsonAsset.text);
                     dlc.Add(characterType.ToString(), json);
                     TextAsset textAsset = new TextAsset(dlc.ToString());
                     settings._CharacterDataJsonAsset = textAsset;
                 }
-                else
+                else if (character.DlcSort == dlcType)
                     __instance._allCharactersJson.Add(characterType.ToString(), json);
+                else
+                    continue;
                 GetManager()!.CharacterDict.Add(characterType, characterWrapper);
+                if(character.InternalID == null) character.InternalID = characterType.ToString();
+                GetManager()!.CharacterID2Type.Add(character.InternalID, characterType);
+            }
+        }
+
+        static void MusicRegister(DataManager __instance)
+        {
+            foreach (MusicDataModelWrapper musicWrapper in GetManager()!.Music)
+            {
+                MusicDataModel music = musicWrapper.Music;
+                BgmType bgm = (BgmType)MusicIDs++;
+                JObject json = JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(music,
+                    Newtonsoft.Json.Formatting.Indented,
+                    SerializerSettings));
+                __instance._allMusicDataJson.Add(bgm.ToString(), json);
+                GetManager()!.MusicDict.Add(bgm, musicWrapper);
+                GetManager()!.MusicID2Type.Add(music.InternalID, bgm);
+            }
+        }
+
+        [HarmonyPatch(typeof(SoundManager))]
+        class SoundManagerPatch
+        {
+            [HarmonyPatch(nameof(SoundManager.PlayMusic))]
+            [HarmonyPostfix]
+            static void PlayMusic_Postfix(SoundManager __instance, BgmType bgmType, SoundManager.SoundConfig config)
+            {
+                if (GetManager()!.MusicDict.ContainsKey(bgmType))
+                {
+                    MasterAudio.Playlist play = new MasterAudio.Playlist();
+                    play.playlistName = bgmType.ToString();
+                    MasterAudio.CreatePlaylist(play, false);
+                    AudioClip a = GetManager()!.MusicDict[bgmType].clip;
+                    MasterAudio.AddSongToPlaylist(bgmType.ToString(), a, true);
+                    MasterAudio.StartPlaylist(bgmType.ToString());
+                }
             }
         }
     }

@@ -1,22 +1,21 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Directers_Cut.FileModels;
+﻿using Directers_Cut.FileModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Directers_Cut.Managers
 {
-    internal class SpriteManager : BaseManager
+    internal class MusicManager : BaseManager
     {
-        internal SpriteManager(string SpritePath, BaseManager baseManager)
+        internal MusicManager(string MusicPath, BaseManager baseManager)
         {
-            this.SpritePath = SpritePath;
+            this.MusicPath = MusicPath;
             _BaseManager = baseManager;
-            ParseSprites();
+            ParseMusic();
         }
 
-        internal void ParseSprites()
+        internal void ParseMusic()
         {
-            foreach (string dir in Directory.GetDirectories(SpritePath))
+            foreach (string dir in Directory.GetDirectories(MusicPath))
             {
                 var files = Directory.GetFiles(dir, "*.json");
                 if (files.Length == 0)
@@ -28,7 +27,7 @@ namespace Directers_Cut.Managers
 
                 if (!File.Exists(jsonFile)) continue;
 
-                GetLogger().Msg($"Loading Sprite Data from {Path.GetDirectoryName(dir)}");
+                GetLogger().Msg($"Loading Music Data from {Path.GetDirectoryName(dir)}");
                 string fileContent = File.ReadAllText(jsonFile);
                 HandleJsonFileString(fileContent, jsonFile);
             }
@@ -37,17 +36,17 @@ namespace Directers_Cut.Managers
         void HandleJsonFileString(string json, string filePath)
         {
 #pragma warning disable S1481
-            BaseSpriteFileModel SpriteData = GetFileData(json, filePath, out Type actualType);
+            BaseMusicFileModel MusicData = GetFileData(json, filePath, out Type actualType);
 #pragma warning restore S1481
 
-            SpriteData.GetSpriteList().ForEach(data =>
+            MusicData.GetMusicList().ForEach(data =>
             {
                 data.BaseDirectory = Path.GetDirectoryName(filePath);
-                _BaseManager.Sprites.Add(data);
+                _BaseManager.Music.Add(data);
             });
         }
 
-        BaseSpriteFileModel GetFileData(string json, string filePath, out Type actualType)
+        BaseMusicFileModel GetFileData(string json, string filePath, out Type actualType)
         {
             JObject jsonObj;
 
@@ -69,10 +68,10 @@ namespace Directers_Cut.Managers
 
             switch (version?.ToString())
             {
-                case SpriteFileModelV1._version:
+                case MusicFileModelV1._version:
                     {
-                        actualType = typeof(SpriteFileModelV1);
-                        var c = JsonConvert.DeserializeObject<SpriteFileModelV1>(json);
+                        actualType = typeof(MusicFileModelV1);
+                        var c = JsonConvert.DeserializeObject<MusicFileModelV1>(json);
 
                         if (c == null)
                         {

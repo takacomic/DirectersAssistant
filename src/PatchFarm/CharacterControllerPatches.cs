@@ -1,14 +1,17 @@
-﻿using Directer_Machine.DataModels;
-using Directer_Machine.JsonModels;
+﻿using Directers_Cut.DataModels;
+using Directers_Cut.JsonModels;
 using HarmonyLib;
 using Il2CppVampireSurvivors.Data;
+using Il2CppVampireSurvivors.Framework;
 using Il2CppVampireSurvivors.Objects.Characters;
 using UnityEngine;
 
-namespace Directer_Machine.PatchFarm
+namespace Directers_Cut.PatchFarm
 {
     internal class CharacterControllerPatches : BasePatch
     {
+        static List<EquipmentModifierJsonModelV1> equipmentUsed = new ();
+
         [HarmonyPatch(typeof(CharacterController))]
         class CharacterControllerPatch
         {
@@ -17,6 +20,7 @@ namespace Directer_Machine.PatchFarm
             static void InitCharacter_Patch(CharacterController __instance, CharacterType characterType)
             {
                 if (!IsCustomCharacter(characterType)) return;
+                equipmentUsed.Clear();
 
                 float x = __instance._spriteRenderer.sprite.rect.width / 95;
                 x = x switch
@@ -33,7 +37,7 @@ namespace Directer_Machine.PatchFarm
 
                 // Can remove due to idle anims
                 CharacterDataModelWrapper modelWrapper = GetManager()!.CharacterDict[characterType];
-                if (modelWrapper.Skin(__instance.CurrentCharacterData.currentSkin)!.AlwaysAnimated)
+                if (modelWrapper.Skin(_skinType)!.AlwaysAnimated)
                 {
                     __instance.IsAnimForced = true;
                 }
@@ -60,14 +64,14 @@ namespace Directer_Machine.PatchFarm
             {
                 if (!IsCustomCharacter(__instance.CharacterType)) return;
 
-                SkinObjectModelV1 skin = GetManager()!.CharacterDict[__instance.CharacterType].Skin(__instance.CurrentSkinData.currentSkin)!;
+                SkinObjectModelV1 skin = GetManager()!.CharacterDict[__instance.CharacterType].Skin(_skinType)!;
                 foreach (var modifier in skin.EquipmentModifiers.Where(modifier => modifier.Level == __instance.Level))
                 {
                     foreach (WeaponType weaponType in modifier.Weapons)
-                        GameManager!.AddWeapon(weaponType, __instance);
+                        _GameManager!.AddWeapon(weaponType, __instance);
 
                     foreach (WeaponType weaponType in modifier.Accessories)
-                        GameManager!.AccessoriesFacade.AddAccessory(weaponType, __instance);
+                        _GameManager!.AccessoriesFacade.AddAccessory(weaponType, __instance);
 
                     foreach (WeaponType weaponType in modifier.HiddenWeapons)
                         HiddenWeaponLeveler(weaponType, __instance, modifier.AllowMulti);
@@ -75,6 +79,101 @@ namespace Directer_Machine.PatchFarm
                     foreach (ArcanaType arcanaType in modifier.Arcana)
                         ArcanaAdder(arcanaType);
                 }
+            }
+
+            [HarmonyPatch(nameof(CharacterController.OnUpdate))]
+            [HarmonyPostfix]
+            static void OnUpdate_Patch(CharacterController __instance)
+            {
+                //Wanted a nicer method to use, but couldn't find one
+                KillCountEquipment(_GameManager!.MainUI.KillsText.text, __instance);
+                TimerEquipment(_GameManager.SurvivedSeconds, __instance);
+            }
+        }
+
+        static void KillCountEquipment(string KillCount, CharacterController characterController)
+        {
+            int kills = int.Parse(KillCount);
+            if (!IsCustomCharacter(characterController.CharacterType)) return;
+
+            List<EquipmentModifierJsonModelV1> equipment = GetManager()!
+                .CharacterDict[characterController.CharacterType]
+                .Skin(_skinType)!.EquipmentModifiers;
+
+            if (!equipment.Any()) return;
+
+            foreach (var modifier in equipment)
+            {
+                if (equipmentUsed.Contains(modifier)) continue;
+                if (modifier.KillCount == 0) continue;
+                if (modifier.Level != 0) continue;
+                if (modifier.Timer != 0) continue;
+                if (modifier.KillCount >= kills) continue;
+
+                if (modifier.Accessories.Any())
+                    foreach (var weaponType in modifier.Accessories)
+                    {
+                        _GameManager!.AccessoriesFacade.AddAccessory(weaponType, characterController);
+                    }
+                if (modifier.Weapons.Any())
+                    foreach (var weaponType in modifier.Weapons)
+                    {
+                        _GameManager!.AddWeapon(weaponType, characterController);
+                    }
+                if (modifier.HiddenWeapons.Any())
+                    foreach (var weaponType in modifier.HiddenWeapons)
+                    {
+                        HiddenWeaponLeveler(weaponType, characterController, modifier.AllowMulti);
+                    }
+                if (modifier.Arcana.Any())
+                    foreach (var arcanaType in modifier.Arcana)
+                    {
+                        ArcanaAdder(arcanaType);
+                    }
+
+                equipmentUsed.Add(modifier);
+            }
+        }
+        static void TimerEquipment(float TimerCounter, CharacterController characterController)
+        {
+            if (!IsCustomCharacter(characterController.CharacterType)) return;
+
+            List<EquipmentModifierJsonModelV1> equipment = GetManager()!
+                .CharacterDict[characterController.CharacterType]
+                .Skin(_skinType)!.EquipmentModifiers;
+
+            if (!equipment.Any()) return;
+
+            foreach (var modifier in equipment)
+            {
+                if (equipmentUsed.Contains(modifier)) continue;
+                if (modifier.KillCount != 0) continue;
+                if (modifier.Level != 0) continue;
+                if (modifier.Timer == 0) continue;
+                if (modifier.Timer >= TimerCounter) continue;
+
+                if (modifier.Accessories.Any())
+                    foreach (var weaponType in modifier.Accessories)
+                    {
+                        _GameManager!.AccessoriesFacade.AddAccessory(weaponType, characterController);
+                    }
+                if (modifier.Weapons.Any())
+                    foreach (var weaponType in modifier.Weapons)
+                    {
+                        _GameManager!.AddWeapon(weaponType, characterController);
+                    }
+                if (modifier.HiddenWeapons.Any())
+                    foreach (var weaponType in modifier.HiddenWeapons)
+                    {
+                        HiddenWeaponLeveler(weaponType, characterController, modifier.AllowMulti);
+                    }
+                if (modifier.Arcana.Any())
+                    foreach (var arcanaType in modifier.Arcana)
+                    {
+                        ArcanaAdder(arcanaType);
+                    }
+
+                equipmentUsed.Add(modifier);
             }
         }
     }

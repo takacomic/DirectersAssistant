@@ -1,9 +1,9 @@
-﻿using Directer_Machine.JsonModels;
-using Newtonsoft.Json;
-using Directer_Machine.DataModels;
+﻿using Newtonsoft.Json;
+using Directers_Cut.DataModels;
+using Directers_Cut.JsonModels;
 using Newtonsoft.Json.Converters;
 
-namespace Directer_Machine.FileModels
+namespace Directers_Cut.FileModels
 {
     internal abstract class BaseCharacterFileModel
     {

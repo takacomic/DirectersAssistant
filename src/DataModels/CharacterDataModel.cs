@@ -1,11 +1,11 @@
-﻿using Directer_Machine.JsonModels;
+﻿using Directers_Cut.JsonModels;
 using Il2CppVampireSurvivors.Data;
 using Il2CppVampireSurvivors.Data.Characters;
 using Il2CppVampireSurvivors.Objects;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Directer_Machine.DataModels
+namespace Directers_Cut.DataModels
 {
     internal class CharacterDataModelWrapper
     {
@@ -15,7 +15,9 @@ namespace Directer_Machine.DataModels
         [JsonIgnore]
         internal List<CharacterDataModel> CharacterSettings { get; set; } = new();
 
-        internal SkinObjectModelV1? Skin(SkinType type) => Character.Skins?[(int)type];
+        internal Dictionary<SkinType, int> CharacterSkinIndices { get; set; } = new();
+
+        internal SkinObjectModelV1? Skin(SkinType type) => Character.Skins?[CharacterSkinIndices[type]];
 
         [JsonIgnore]
         internal CharacterDataModel Character
@@ -30,6 +32,7 @@ namespace Directer_Machine.DataModels
 
     internal class CharacterDataModel
     {
+        [JsonProperty("internalID")] public string InternalID { get; set; }
 
         [JsonProperty("isBought")] public bool IsBought { get; set; }
 
@@ -44,6 +47,8 @@ namespace Directer_Machine.DataModels
         [JsonProperty("banish")] public float Banish { get; set; }
 
         [JsonProperty("bgm")] public BgmType? BGM { get; set; }
+
+        [JsonProperty("customBgm")] public string? CustomBgm { get; set; }
 
         [JsonProperty("bodyOffset")] public Vector2 BodyOffset { get; set; }
 
@@ -69,7 +74,7 @@ namespace Directer_Machine.DataModels
 
         [JsonProperty("description")] public string? Description { get; set; }
 
-        [JsonProperty("dlcSort")] public DlcType? DlcSort { get; set; }
+        [JsonProperty("dlcSort")] public DlcType? DlcSort { get; set; } = (DlcType)10000;
 
         [JsonProperty("duration")] public float Duration { get; set; }
 

@@ -1,12 +1,13 @@
 ﻿using System.Reflection;
-using Directer_Machine.DataModels;
+using Directers_Cut.DataModels;
 using HarmonyLib;
 using Il2CppVampireSurvivors.Data;
 using Il2CppVampireSurvivors.Graphics;
+using Il2CppVampireSurvivors.Objects.Characters;
 using Il2CppVampireSurvivors.UI;
 using UnityEngine;
 
-namespace Directer_Machine.PatchFarm
+namespace Directers_Cut.PatchFarm
 {
     internal class CharacterSelectionPatches : BasePatch
     {
@@ -19,6 +20,7 @@ namespace Directer_Machine.PatchFarm
             {
                 CharacterType cType = __instance.CharacterItem._characterType;
                 if (!IsCustomCharacter(cType)) return true;
+                _skinType = __instance.CharacterItem.GetCurrentSkinItem().SkinType;
 
                 CharacterDataModelWrapper modelWrapper = GetManager()!.CharacterDict[cType];
                 if (modelWrapper.Character.CustomPortrait == null && !modelWrapper.Character.SmallPortrait)
@@ -76,6 +78,7 @@ namespace Directer_Machine.PatchFarm
                     __instance._CharacterIcon.rectTransform.sizeDelta = size;
                     __instance.gameObject.GetComponent<RectTransform>().sizeDelta = size;
                 }
+
                 return false;
             }
         }
