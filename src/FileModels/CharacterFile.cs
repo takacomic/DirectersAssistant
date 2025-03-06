@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
-using Directers_Cut.DataModels;
-using Directers_Cut.JsonModels;
+﻿using Directers_Assistant.src.DataModels;
+using Directers_Assistant.src.JsonModels;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Directers_Cut.FileModels
+namespace Directers_Assistant.src.FileModels
 {
     internal abstract class BaseCharacterFileModel
     {
@@ -23,7 +23,7 @@ namespace Directers_Cut.FileModels
         internal override Version Version { get; } = new Version("1.0");
 
         [JsonProperty("character")]
-        internal CharacterJsonModelV1? Character {  get; set; }
+        internal CharacterJsonModelV1? Character { get; set; }
 
         internal override Type FileVersion() => typeof(CharacterFileModelV1);
 

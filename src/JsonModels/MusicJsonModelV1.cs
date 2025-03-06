@@ -1,9 +1,9 @@
-﻿using Directers_Cut.DataModels;
+﻿using Directers_Assistant.src.DataModels;
 using Il2CppVampireSurvivors.Data;
 using Newtonsoft.Json;
 using System.Reflection;
 
-namespace Directers_Cut.JsonModels
+namespace Directers_Assistant.src.JsonModels
 {
     internal class MusicJsonModelV1
     {

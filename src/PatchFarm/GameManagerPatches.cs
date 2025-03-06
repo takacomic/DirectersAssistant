@@ -1,13 +1,13 @@
 ﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Directers_Cut.DataModels;
-using Directers_Cut.JsonModels;
+using Directers_Assistant.src.DataModels;
+using Directers_Assistant.src.JsonModels;
 using HarmonyLib;
 using Il2CppVampireSurvivors.Data;
 using Il2CppVampireSurvivors.Framework;
 using Il2CppVampireSurvivors.Objects.Characters;
 
-namespace Directers_Cut.PatchFarm
+namespace Directers_Assistant.src.PatchFarm
 {
     internal class GameManagerPatches : BasePatch
     {

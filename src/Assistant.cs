@@ -1,10 +1,10 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
-using Directers_Cut.Managers;
-using Directers_Cut.PatchFarm;
+using Directers_Assistant.src.Managers;
+using Directers_Assistant.src.PatchFarm;
 using MelonLoader;
 
-namespace Directers_Cut
+namespace Directers_Assistant.src
 {
     internal static class ModInfo
     {
@@ -12,12 +12,13 @@ namespace Directers_Cut
         public const string Description = "";
         public const string Author = "Takacomic";
         public const string Company = "CorruptedInfluences";
-        public const string Version = "0.1.0";
+        public const string Version = "0.1.2";
         public const string Download = "https://github.com/takacomic/DirectersMachine/latest";
     }
     internal class DirecterAssistantMod : MelonMod
     {
         private static readonly string ModDirectory = Path.Combine(Directory.GetCurrentDirectory(), "UserData", "DirectersAssistant");
+        private static readonly string BloodDirectory = Path.Combine(Directory.GetCurrentDirectory(), "UserData", "Bloodlines", "data", "characters");
         private static readonly string LibDirectory = Path.Combine(Directory.GetCurrentDirectory(), "UserLibs");
         private static readonly string DataDirectory = Path.Combine(ModDirectory, "data");
         internal bool AudioImport = false;
@@ -30,9 +31,9 @@ namespace Directers_Cut
                 Directory.CreateDirectory(ModDirectory);
                 Directory.CreateDirectory(DataDirectory);
             }
-            BaseManager = new(ModDirectory, DataDirectory);
-            BasePatch = new ();
-            if(LibCheck("AudioImportLib.dll")) AudioImport = true;
+            BaseManager = new(ModDirectory, DataDirectory, BloodDirectory);
+            BasePatch = new();
+            if (LibCheck("AudioImportLib.dll")) AudioImport = true;
         }
 
         internal bool LibCheck(string lib)

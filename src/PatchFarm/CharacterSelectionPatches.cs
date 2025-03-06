@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Directers_Cut.DataModels;
+using Directers_Assistant.src.DataModels;
 using HarmonyLib;
 using Il2CppVampireSurvivors.Data;
 using Il2CppVampireSurvivors.Graphics;
@@ -7,7 +7,7 @@ using Il2CppVampireSurvivors.Objects.Characters;
 using Il2CppVampireSurvivors.UI;
 using UnityEngine;
 
-namespace Directers_Cut.PatchFarm
+namespace Directers_Assistant.src.PatchFarm
 {
     internal class CharacterSelectionPatches : BasePatch
     {

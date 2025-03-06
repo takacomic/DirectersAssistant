@@ -1,8 +1,8 @@
-﻿using Directers_Cut.FileModels;
+﻿using Directers_Assistant.src.FileModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Directers_Cut.Managers
+namespace Directers_Assistant.src.Managers
 {
     internal class CharacterManager : BaseManager
     {
@@ -10,7 +10,7 @@ namespace Directers_Cut.Managers
         internal CharacterManager(string CharacterPath, BaseManager baseManager, SpriteManager spriteManager)
         {
             this.CharacterPath = CharacterPath;
-            this.SpriteManager = spriteManager;
+            SpriteManager = spriteManager;
             _BaseManager = baseManager;
             ParseCharacterFiles();
         }
@@ -33,7 +33,7 @@ namespace Directers_Cut.Managers
                 string fileContent = File.ReadAllText(jsonFile);
                 HandleJsonFileString(fileContent, jsonFile);
             }
-            if (this.SpriteRetrigger) SpriteManager.ParseSprites();
+            if (SpriteRetrigger) SpriteManager.ParseSprites();
         }
 
         void HandleJsonFileString(string json, string filePath)
@@ -79,7 +79,7 @@ namespace Directers_Cut.Managers
                     }
                 case "0.3":
                     {
-                        this.SpriteRetrigger = true;
+                        SpriteRetrigger = true;
 
                         actualType = typeof(CharacterFileModelV1);
                         CharacterFileModelV1? c = JsonConvert.DeserializeObject<CharacterFileModelV1>(characterFromBloodlines(json, filePath));

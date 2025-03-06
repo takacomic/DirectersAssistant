@@ -1,10 +1,10 @@
 ﻿using System.IO.Compression;
-using Directers_Cut.DataModels;
+using Directers_Assistant.src.DataModels;
 using Il2CppVampireSurvivors.Data;
 using Il2CppVampireSurvivors.Framework;
 using MelonLoader;
 
-namespace Directers_Cut.Managers
+namespace Directers_Assistant.src.Managers
 {
     internal class BaseManager
     {
@@ -33,7 +33,7 @@ namespace Directers_Cut.Managers
         internal MusicManager MusicManager = null!;
         internal SpriteManager SpriteManager = null!;
         internal BaseManager _BaseManager = null!;
-        internal BaseManager(string ZipPath, string DataPath)
+        internal BaseManager(string ZipPath, string DataPath, string BloodlinesPath)
         {
             this.ZipPath = ZipPath;
             this.DataPath = DataPath;
@@ -48,6 +48,7 @@ namespace Directers_Cut.Managers
             try
             {
                 CreateInitDirectories();
+                HotPotatoBloodlinesFiles(BloodlinesPath);
                 ParseZipFiles();
                 BaseSuccess = true;
             }
@@ -105,6 +106,29 @@ namespace Directers_Cut.Managers
                 }
             }
         }
+
+        void HotPotatoBloodlinesFiles(string path)
+        {
+            foreach (string dir in Directory.GetDirectories(path))
+            {
+                DirectoryInfo directoryInfo = new DirectoryInfo(dir);
+
+                CreateDirectory(Path.Combine(CharacterPath, directoryInfo.Name));
+                CreateDirectory(Path.Combine(SpritePath, directoryInfo.Name));
+                foreach (string file in Directory.GetFiles(Path.Combine(path, dir)))
+                {
+                    FileInfo fileInfo = new FileInfo(file);
+                    if (file.EndsWith(".json"))
+                    {
+                        File.Move(file, Path.Combine(CharacterPath, directoryInfo.Name, fileInfo.Name));
+                    }
+                    else if (file.EndsWith(".png"))
+                    {
+                        File.Move(file, Path.Combine(SpritePath, directoryInfo.Name, fileInfo.Name));
+                    }
+                }
+            }
+        }
         void handleZipFile(string filePath)
         {
             List<string> filesToClean = new();
@@ -112,7 +136,7 @@ namespace Directers_Cut.Managers
             {
                 string zipName = Path.GetFileNameWithoutExtension(filePath);
                 using FileStream fileStream = File.OpenRead(filePath);
-                using ZipArchive zipArchive = new (fileStream, ZipArchiveMode.Read);
+                using ZipArchive zipArchive = new(fileStream, ZipArchiveMode.Read);
                 foreach (ZipArchiveEntry entry in zipArchive.Entries)
                 {
                     if (entry.FullName.EndsWith('/'))
@@ -139,7 +163,7 @@ namespace Directers_Cut.Managers
                     {
                         if (entry.Name.EndsWith(".json") || entry.Name.EndsWith(".mp3") || entry.Name.EndsWith(".ogg"))
                         {
-                            if(!entry.FullName.Contains('/'))
+                            if (!entry.FullName.Contains('/'))
                             {
                                 // For Bloodlines Characters
                                 CreateDirectory(Path.Combine(CharacterPath, zipName));

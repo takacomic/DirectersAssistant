@@ -1,9 +1,9 @@
-﻿using Directers_Cut.DataModels;
-using Directers_Cut.JsonModels;
+﻿using Directers_Assistant.src.DataModels;
+using Directers_Assistant.src.JsonModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Directers_Cut.FileModels
+namespace Directers_Assistant.src.FileModels
 {
     internal abstract class BaseSpriteFileModel
     {

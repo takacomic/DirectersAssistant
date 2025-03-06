@@ -1,6 +1,5 @@
 ﻿using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using Directers_Cut.Managers;
 using Il2CppSystem.Runtime.Remoting.Messaging;
 using Il2CppVampireSurvivors.Data;
 using Il2CppVampireSurvivors.Framework;
@@ -8,8 +7,9 @@ using Il2CppVampireSurvivors.Objects.Characters;
 using Il2CppVampireSurvivors.Objects;
 using MelonLoader;
 using Newtonsoft.Json;
+using Directers_Assistant.src.Managers;
 
-namespace Directers_Cut.PatchFarm
+namespace Directers_Assistant.src.PatchFarm
 {
 #pragma warning disable S1118
     internal class BasePatch

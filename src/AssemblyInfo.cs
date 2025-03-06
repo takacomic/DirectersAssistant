@@ -1,5 +1,5 @@
-﻿using Directers_Cut;
-using MelonLoader;
+﻿using MelonLoader;
+using Directers_Assistant.src;
 using System.Reflection;
 using System.Runtime.InteropServices;
 

@@ -1,11 +1,11 @@
-﻿using Directers_Cut.JsonModels;
+﻿using Directers_Assistant.src.JsonModels;
 using Il2CppVampireSurvivors.Data;
 using Il2CppVampireSurvivors.Data.Characters;
 using Il2CppVampireSurvivors.Objects;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Directers_Cut.DataModels
+namespace Directers_Assistant.src.DataModels
 {
     internal class CharacterDataModelWrapper
     {

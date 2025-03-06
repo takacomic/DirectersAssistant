@@ -1,16 +1,16 @@
-﻿using Directers_Cut.DataModels;
-using Directers_Cut.JsonModels;
+﻿using Directers_Assistant.src.DataModels;
+using Directers_Assistant.src.JsonModels;
 using HarmonyLib;
 using Il2CppVampireSurvivors.Data;
 using Il2CppVampireSurvivors.Framework;
 using Il2CppVampireSurvivors.Objects.Characters;
 using UnityEngine;
 
-namespace Directers_Cut.PatchFarm
+namespace Directers_Assistant.src.PatchFarm
 {
     internal class CharacterControllerPatches : BasePatch
     {
-        static List<EquipmentModifierJsonModelV1> equipmentUsed = new ();
+        static List<EquipmentModifierJsonModelV1> equipmentUsed = new();
 
         [HarmonyPatch(typeof(CharacterController))]
         class CharacterControllerPatch

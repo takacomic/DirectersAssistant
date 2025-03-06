@@ -3,11 +3,11 @@ using Il2CppVampireSurvivors.Data.Characters;
 using Il2CppVampireSurvivors.Objects;
 using Newtonsoft.Json;
 using System.Reflection;
-using Directers_Cut.DataModels;
 using MelonLoader;
 using UnityEngine;
+using Directers_Assistant.src.DataModels;
 
-namespace Directers_Cut.JsonModels
+namespace Directers_Assistant.src.JsonModels
 {
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     internal class CharacterJsonModelV1
@@ -172,11 +172,11 @@ namespace Directers_Cut.JsonModels
                 switch (prop.Name)
                 {
                     case "StatModifiers":
-                    {
-                        foreach (StatModifierJsonModelV1 statMod in StatModifiers.Skip(1))
-                            modelWrapper.CharacterSettings.Add(statMod.toCharacterDataModel());
-                        break;
-                    }
+                        {
+                            foreach (StatModifierJsonModelV1 statMod in StatModifiers.Skip(1))
+                                modelWrapper.CharacterSettings.Add(statMod.toCharacterDataModel());
+                            break;
+                        }
                     case "OnEveryLevelUp" when OnEveryLevelUp != null:
                         c.OnEveryLevelUp = OnEveryLevelUp.toModifierStat();
                         break;
@@ -342,16 +342,16 @@ namespace Directers_Cut.JsonModels
     public class EquipmentModifierJsonModelV1
     {
         [JsonProperty("accessories")]
-        public List<WeaponType> Accessories { get; set; } = new ();
+        public List<WeaponType> Accessories { get; set; } = new();
 
         [JsonProperty("allowMultiHidden")]
         public bool AllowMulti { get; set; }
 
         [JsonProperty("weapons")]
-        public List<WeaponType> Weapons { get; set; } = new ();
+        public List<WeaponType> Weapons { get; set; } = new();
 
         [JsonProperty("hiddenWeapons")]
-        public List<WeaponType> HiddenWeapons { get; set; } = new ();
+        public List<WeaponType> HiddenWeapons { get; set; } = new();
 
         [JsonProperty("killCount")]
         public int KillCount { get; set; }
@@ -363,7 +363,7 @@ namespace Directers_Cut.JsonModels
         public int Timer { get; set; }
 
         [JsonProperty("arcana")]
-        public List<ArcanaType> Arcana { get; set; } = new ();
+        public List<ArcanaType> Arcana { get; set; } = new();
     }
 
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
@@ -403,13 +403,13 @@ namespace Directers_Cut.JsonModels
         public float Duration { get; set; }
 
         [JsonProperty("equipmentModifiers")]
-        public List<EquipmentModifierJsonModelV1> EquipmentModifiers { get; set; } = new ();
+        public List<EquipmentModifierJsonModelV1> EquipmentModifiers { get; set; } = new();
 
         [JsonProperty("exAccessories")]
-        public List<WeaponType> ExAccessories { get; set; } = new ();
+        public List<WeaponType> ExAccessories { get; set; } = new();
 
         [JsonProperty("exWeapons")]
-        public List<WeaponType> ExWeapons { get; set; } = new ();
+        public List<WeaponType> ExWeapons { get; set; } = new();
 
         [JsonProperty("greed")]
         public float Greed { get; set; }
@@ -424,7 +424,7 @@ namespace Directers_Cut.JsonModels
         public bool Hidden { get; set; }
 
         [JsonProperty("hiddenWeapons")]
-        public List<WeaponType> HiddenWeapons { get; set; } = new ();
+        public List<WeaponType> HiddenWeapons { get; set; } = new();
 
         [JsonProperty("luck")]
         public float Luck { get; set; }
@@ -484,7 +484,7 @@ namespace Directers_Cut.JsonModels
         public string? SpriteName { get; set; }
 
         [JsonProperty("startingArcana")]
-        public List<ArcanaType> StartingArcana { get; set; } = new ();
+        public List<ArcanaType> StartingArcana { get; set; } = new();
 
         [JsonProperty("startingWeapon")]
         public WeaponType? StartingWeapon { get; set; }

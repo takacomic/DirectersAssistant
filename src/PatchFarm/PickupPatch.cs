@@ -4,7 +4,7 @@ using Il2CppVampireSurvivors.Objects.Items;
 using Il2CppVampireSurvivors.Objects.Pickups;
 using UnityEngine;
 
-namespace Directers_Cut.PatchFarm
+namespace Directers_Assistant.src.PatchFarm
 {
     internal class PickupPatch : BasePatch
     {

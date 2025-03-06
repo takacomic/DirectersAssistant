@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System.Reflection;
-using Directers_Cut.DataModels;
 using UnityEngine;
+using Directers_Assistant.src.DataModels;
 
-namespace Directers_Cut.JsonModels
+namespace Directers_Assistant.src.JsonModels
 {
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     internal class SpriteJsonModelV1

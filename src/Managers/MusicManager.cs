@@ -1,8 +1,8 @@
-﻿using Directers_Cut.FileModels;
+﻿using Directers_Assistant.src.FileModels;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Directers_Cut.Managers
+namespace Directers_Assistant.src.Managers
 {
     internal class MusicManager : BaseManager
     {

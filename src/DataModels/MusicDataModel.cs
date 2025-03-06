@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using UnityEngine;
 using AudioImportLib;
 
-namespace Directers_Cut.DataModels
+namespace Directers_Assistant.src.DataModels
 {
     internal class MusicDataModelWrapper
     {
