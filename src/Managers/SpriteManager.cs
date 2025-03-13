@@ -28,7 +28,7 @@ namespace Directers_Assistant.src.Managers
 
                 if (!File.Exists(jsonFile)) continue;
 
-                GetLogger().Msg($"Loading Sprite Data from {Path.GetDirectoryName(dir)}");
+                GetLogger().Msg($"Loading Sprite Data from {Path.GetDirectoryName(files[0])}");
                 string fileContent = File.ReadAllText(jsonFile);
                 HandleJsonFileString(fileContent, jsonFile);
             }

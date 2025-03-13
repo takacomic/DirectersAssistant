@@ -143,7 +143,7 @@ namespace Directers_Assistant.src.JsonModels
                 if (c.GetType().GetProperty(prop.Name) == null)
                 {
 #if DEBUG
-                    Melon<DirecterMachineMod>.Logger.Msg($"No match for {prop.Name}");
+                    Melon<DirecterAssistantMod>.Logger.Msg($"No match for {prop.Name}");
 #endif // DEBUG
                     continue;
                 }
@@ -161,7 +161,7 @@ namespace Directers_Assistant.src.JsonModels
                 if (c.GetType().GetProperty(prop.Name) == null && prop.Name != "StatModifiers")
                 {
 #if DEBUG
-                    Melon<DirecterMachineMod>.Logger.Msg($"No match for {prop.Name}");
+                    Melon<DirecterAssistantMod>.Logger.Msg($"No match for {prop.Name}");
 #endif // DEBUG
 
                     continue;
@@ -316,7 +316,7 @@ namespace Directers_Assistant.src.JsonModels
                     if (c.GetType().GetProperty(prop.Name) == null)
                     {
 #if DEBUG
-                        Melon<DirecterMachineMod>.Logger.Msg($"No match for {prop.Name}");
+                        Melon<DirecterAssistantMod>.Logger.Msg($"No match for {prop.Name}");
 #endif // DEBUG
 
                         continue;

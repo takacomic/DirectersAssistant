@@ -12,7 +12,7 @@ namespace Directers_Assistant.src.DataModels
         [JsonIgnore]
         internal string? BaseDirectory { get; set; }
 
-        internal string MusicPath => Path.Combine(BaseDirectory!, Music.Source!);
+        internal string MusicPath => Path.Combine(BaseDirectory!, Music.MusicSource!);
 
         internal AudioClip clip => API.LoadAudioClip(MusicPath);
     }
@@ -23,6 +23,7 @@ namespace Directers_Assistant.src.DataModels
         [JsonProperty("author")] public string Author { get; set; }
         [JsonProperty("isUnlocked")] public bool IsUnlocked { get; set; }
         [JsonProperty("source")] public string Source { get; set; }
+        [JsonProperty("musicSource")] public string MusicSource { get; set; }
         [JsonProperty("unlockedByCharacter")] public string? UnlockCharacter { get; set; }
         [JsonProperty("unlockedByItem")] public string? UnlockItem { get; set; }
         [JsonProperty("unlockedByStage")] public string? UnlockStage { get; set; }

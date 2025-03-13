@@ -13,6 +13,7 @@ namespace Directers_Assistant.src.Managers
         internal Dictionary<string, CharacterType> CharacterID2Type { get; set; } = new();
 
         internal List<SpriteDataModelWrapper> Sprites { get; set; } = new();
+        internal List<AlbumDataModelWrapper> Albums { get; set; } = new();
 
         internal List<MusicDataModelWrapper> Music { get; set; } = new();
         internal Dictionary<BgmType, MusicDataModelWrapper> MusicDict { get; set; } = new();
@@ -25,6 +26,7 @@ namespace Directers_Assistant.src.Managers
         internal string CharacterPath;
         internal string SpritePath = null!;
         internal string MusicPath = null!;
+        internal string AlbumPath = null!;
         internal string WeaponPath = null!;
         internal string ArcanaPath = null!;
         public readonly bool BaseSuccess;
@@ -41,6 +43,7 @@ namespace Directers_Assistant.src.Managers
             CharacterPath = Path.Combine(DataPath, "Bloodlines");
             SpritePath = Path.Combine(DataPath, "Sprites");
             MusicPath = Path.Combine(DataPath, "Blackdisk");
+            AlbumPath = Path.Combine(MusicPath, "Albums");
             WeaponPath = Path.Combine(DataPath, "Weapons");
             ArcanaPath = Path.Combine(DataPath, "Arcana");
             _BaseManager = this;
@@ -68,7 +71,7 @@ namespace Directers_Assistant.src.Managers
         void CreateInitDirectories()
         {
             List<string> directories = new List<string> { SavePackPath, CharacterPath, SpritePath,
-                MusicPath/*, WeaponPath, ArcanaPath*/ };
+                MusicPath, AlbumPath/*, WeaponPath, ArcanaPath*/ };
 
             foreach (string dir in directories)
             {

@@ -37,6 +37,7 @@ namespace Directers_Assistant.src.PatchFarm
                 if (Melon<DirecterAssistantMod>.Instance.AudioImport)
                 {
                     MusicRegister(__instance);
+                    AlbumRegisterBD(__instance);
                     AlbumRegister(__instance);
                 }
                 CharacterRegister(__instance, (DlcType)10000, null!);
@@ -126,7 +127,7 @@ namespace Directers_Assistant.src.PatchFarm
             }
         }
 
-        static void AlbumRegister(DataManager __instance)
+        static void AlbumRegisterBD(DataManager __instance)
         {
             Texture2D texture2D = SpriteImporter.LoadTexture("blackDiskAlbumArt.png");
             Sprite sprite = SpriteImporter.LoadSprite(texture2D, new Rect(0f, 0f, 512f, 512f), "blackdisk");
@@ -150,37 +151,57 @@ namespace Directers_Assistant.src.PatchFarm
             __instance._allAlbumData.Add(album.ToString(), json);
         }
 
-        [HarmonyPatch(typeof(SoundManager))]
-        class SoundManagerPatch
+        static void AlbumRegister(DataManager __instance)
         {
-            [HarmonyPatch(nameof(SoundManager.PlayMusic))]
-            [HarmonyPostfix]
-            static void PlayMusic_Postfix(SoundManager __instance, BgmType bgmType, SoundManager.SoundConfig config)
+            foreach(AlbumDataModelWrapper albumWrapper in GetManager().Albums)
             {
-                GetLogger().Msg("Out");
-                /*if (GetManager()!.MusicDict.ContainsKey(bgmType))
+                AlbumType album = (AlbumType)AlbumIDs++;
+                JArray jArray = new JArray();
+                for (int i = 0; i < albumWrapper.Album.TrackList.Count; i++)
+                    jArray.Add(GetManager()!.MusicID2Type[albumWrapper.Album.TrackList[i]].ToString());
+
+                JObject json = JObject.Parse(Newtonsoft.Json.JsonConvert.SerializeObject(albumWrapper.Album,
+                    Newtonsoft.Json.Formatting.Indented,
+                    SerializerSettings));
+                json.Remove("trackList");
+                json.Add("trackList", jArray);
+                __instance._allAlbumData.Add(album.ToString(), json);
+            }
+        }
+
+        [HarmonyPatch(typeof(SongSelectionPanel))]
+        class SSongSelectionPanelPatch
+        {
+            [HarmonyPatch(nameof(SongSelectionPanel.SetIcon))]
+            [HarmonyPostfix]
+            static void SetIcon_Postfix(SongSelectionPanel __instance)
+            {
+                BgmType bgm = __instance._selectedSong;
+                if(GetManager().MusicDict.ContainsKey(bgm))
                 {
-                    GetLogger().Msg("In");
+                    MusicDataModelWrapper musicWrapper = GetManager().MusicDict[bgm];
+                    __instance._Icon.sprite = SpriteManager.GetSprite(musicWrapper.Music.Icon);
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(AdvancedMusicSelection.__c__DisplayClass61_0))]
+        class AdvancedMusicSelection__c__DisplayClass61_0Patch
+        {
+            [HarmonyPatch(nameof(AdvancedMusicSelection.__c__DisplayClass61_0._PlayAtSpeed_b__0))]
+            [HarmonyPostfix]
+            static void PlayMusic_Postfix(AdvancedMusicSelection.__c__DisplayClass61_0 __instance)
+            {
+                BgmType bgmType = __instance.__4__this._selectedTrack._bgmType;
+                if (GetManager()!.MusicDict.ContainsKey(bgmType))
+                {
                     MasterAudio.Playlist play = new MasterAudio.Playlist();
                     play.playlistName = bgmType.ToString();
                     MasterAudio.CreatePlaylist(play, false);
                     AudioClip a = GetManager()!.MusicDict[bgmType].clip;
                     MasterAudio.AddSongToPlaylist(bgmType.ToString(), a, true);
                     MasterAudio.StartPlaylist(bgmType.ToString());
-                }*/
-            }
-        }
-
-        [HarmonyPatch(typeof(AdvancedMusicSelection))]
-        class AdvancedMusicPatch
-        {
-            [HarmonyPatch(nameof(AdvancedMusicSelection.PlayAtSpeed))]
-            [HarmonyPostfix]
-            static void PlayAtSpeed_Postfix(AdvancedMusicSelection __instance)
-            {
-
-
-
+                }
             }
         }
     }

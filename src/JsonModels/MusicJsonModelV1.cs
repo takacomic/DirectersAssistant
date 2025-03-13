@@ -1,5 +1,6 @@
 ﻿using Directers_Assistant.src.DataModels;
 using Il2CppVampireSurvivors.Data;
+using MelonLoader;
 using Newtonsoft.Json;
 using System.Reflection;
 
@@ -11,6 +12,7 @@ namespace Directers_Assistant.src.JsonModels
         [JsonProperty("author")] public string Author { get; set; }
         [JsonProperty("isUnlocked")] public bool IsUnlocked { get; set; }
         [JsonProperty("source")] public string Source { get; set; }
+        [JsonProperty("musicSource")] public string MusicSource { get; set; }
         [JsonProperty("unlockedByCharacter")] public string? UnlockCharacter { get; set; }
         [JsonProperty("unlockedByItem")] public string? UnlockItem { get; set; }
         [JsonProperty("unlockedByStage")] public string? UnlockStage { get; set; }
@@ -33,7 +35,7 @@ namespace Directers_Assistant.src.JsonModels
                 if (s.GetType().GetProperty(prop.Name) == null)
                 {
 #if DEBUG
-                    Melon<DirecterMachineMod>.Logger.Msg($"No match for {prop.Name}");
+                    Melon<DirecterAssistantMod>.Logger.Msg($"No match for {prop.Name}");
 #endif // DEBUG
 
                     continue;
