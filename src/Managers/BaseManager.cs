@@ -3,6 +3,7 @@ using Directers_Assistant.src.DataModels;
 using Il2CppVampireSurvivors.Data;
 using Il2CppVampireSurvivors.Framework;
 using MelonLoader;
+using MelonLoader.ICSharpCode.SharpZipLib.GZip;
 
 namespace Directers_Assistant.src.Managers
 {
@@ -51,7 +52,7 @@ namespace Directers_Assistant.src.Managers
             try
             {
                 CreateInitDirectories();
-                HotPotatoBloodlinesFiles(BloodlinesPath);
+                if(Directory.Exists(BloodlinesPath)) HotPotatoBloodlinesFiles(BloodlinesPath);
                 ParseZipFiles();
                 BaseSuccess = true;
             }
@@ -93,6 +94,7 @@ namespace Directers_Assistant.src.Managers
         {
             if (Directory.Exists(ZipPath) && !EmptyDir(ZipPath))
             {
+
                 List<string> zips = Directory.GetFiles(ZipPath, "*.zip").ToList();
 
                 foreach (string zip in zips)

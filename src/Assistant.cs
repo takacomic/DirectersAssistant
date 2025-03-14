@@ -12,7 +12,7 @@ namespace Directers_Assistant.src
         public const string Description = "";
         public const string Author = "Takacomic";
         public const string Company = "CorruptedInfluences";
-        public const string Version = "0.1.3";
+        public const string Version = "0.1.4";
         public const string Download = "https://github.com/takacomic/DirectersMachine/latest";
     }
     internal class DirecterAssistantMod : MelonMod
