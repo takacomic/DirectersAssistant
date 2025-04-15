@@ -26,6 +26,8 @@ namespace Directers_Assistant.src.PatchFarm
         internal static int MusicIDs { get; private set; } = 10000;
         internal static int AlbumIDs { get; private set; } = 10000;
 
+        private static BgmType advancedMusic = BgmType.BGM_Forest;
+
         [HarmonyPatch(typeof(DataManager))]
         class DataManagerPatch
         {
@@ -170,7 +172,7 @@ namespace Directers_Assistant.src.PatchFarm
         }
 
         [HarmonyPatch(typeof(SongSelectionPanel))]
-        class SSongSelectionPanelPatch
+        class SongSelectionPanelPatch
         {
             [HarmonyPatch(nameof(SongSelectionPanel.SetIcon))]
             [HarmonyPostfix]
@@ -185,16 +187,19 @@ namespace Directers_Assistant.src.PatchFarm
             }
         }
 
-        [HarmonyPatch(typeof(AdvancedMusicSelection.__c__DisplayClass61_0))]
-        class AdvancedMusicSelection__c__DisplayClass61_0Patch
+        [HarmonyPatch(typeof(AdvancedMusicSelection))]
+        class AdvancedMusicSelection_Patch
         {
-            [HarmonyPatch(nameof(AdvancedMusicSelection.__c__DisplayClass61_0._PlayAtSpeed_b__0))]
+            [HarmonyPatch(nameof(AdvancedMusicSelection.Update))]
             [HarmonyPostfix]
-            static void PlayMusic_Postfix(AdvancedMusicSelection.__c__DisplayClass61_0 __instance)
+            static void Update_Postfix(AdvancedMusicSelection __instance)
             {
-                BgmType bgmType = __instance.__4__this._selectedTrack._bgmType;
-                if (GetManager()!.MusicDict.ContainsKey(bgmType))
+                // Did not want to use Update but looks like class name is a temp
+                BgmType bgmType = __instance._selectedTrack._bgmType;
+                if (GetManager()!.MusicDict.ContainsKey(bgmType) && bgmType != advancedMusic)
                 {
+                    advancedMusic = bgmType;
+
                     MasterAudio.Playlist play = new MasterAudio.Playlist();
                     play.playlistName = bgmType.ToString();
                     MasterAudio.CreatePlaylist(play, false);
@@ -202,6 +207,20 @@ namespace Directers_Assistant.src.PatchFarm
                     MasterAudio.AddSongToPlaylist(bgmType.ToString(), a, true);
                     MasterAudio.StartPlaylist(bgmType.ToString());
                 }
+            }
+
+            [HarmonyPatch(nameof(AdvancedMusicSelection.OnDestroy))]
+            [HarmonyPostfix]
+            static void OnDestroy_Postfix(AdvancedMusicSelection __instance)
+            {
+                advancedMusic = BgmType.BGM_Forest;
+            }
+
+            [HarmonyPatch(nameof(AdvancedMusicSelection.ChangeAlbum))]
+            [HarmonyPostfix]
+            static void ChangeAlbum_Postfix(AdvancedMusicSelection __instance)
+            {
+                advancedMusic = BgmType.BGM_Forest;
             }
         }
     }
