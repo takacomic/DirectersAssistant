@@ -1,0 +1,16 @@
+<Project>
+    
+    <PropertyGroup>
+        <VSDir>/mnt/data/SteamLibrary/steamapps/common/VSModded</VSDir>
+        <Net6>$(VSDir)/MelonLoader/net6</Net6>
+        <Il2>$(VSDir)/MelonLoader/Il2CppAssemblies</Il2>
+    </PropertyGroup>
+    
+    <Target Name="PostBuild" AfterTargets="Build">
+        <Copy
+            SourceFiles="$(TargetPath)"
+            DestinationFolder="$(VSDir)/Mods"
+        />
+    </Target>
+    
+</Project>

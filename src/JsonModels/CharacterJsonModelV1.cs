@@ -287,6 +287,7 @@ namespace Directers_Assistant.src.JsonModels
                 try
                 {
                     if (m.GetType().GetProperty(prop.Name) == null) continue;
+                    
 
                     var value = prop.GetValue(this, null);
                     m.GetType().GetProperty(prop.Name)!.SetValue(m,

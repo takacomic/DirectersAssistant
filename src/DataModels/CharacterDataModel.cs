@@ -20,14 +20,7 @@ namespace Directers_Assistant.src.DataModels
         internal SkinObjectModelV1? Skin(SkinType type) => Character.Skins?[CharacterSkinIndices[type]];
 
         [JsonIgnore]
-        internal CharacterDataModel Character
-        {
-            get
-            {
-                if (CharacterSettings.Any()) return CharacterSettings[0];
-                throw new InvalidOperationException("Character have not been set.");
-            }
-        }
+        internal CharacterDataModel Character => CharacterSettings.Any() ? CharacterSettings[0] : throw new InvalidOperationException("Character have not been set.");
     }
 
     internal class CharacterDataModel
@@ -50,7 +43,7 @@ namespace Directers_Assistant.src.DataModels
 
         [JsonProperty("customBgm")] public string? CustomBgm { get; set; }
 
-        [JsonProperty("bodyOffset")] public Vector2 BodyOffset { get; set; }
+        //[JsonProperty("bodyOffset")] public Vector2 BodyOffset { get; set; }
 
         [JsonProperty("charm")] public int Charm { get; set; }
 
@@ -124,11 +117,11 @@ namespace Directers_Assistant.src.DataModels
 
         [JsonProperty("price")] public float Price { get; set; }
 
-        [JsonProperty("racingOffsets")] public List<RacingOffsetData>? RacingOffsets { get; set; }
+        //[JsonProperty("racingOffsets")] public List<RacingOffsetData>? RacingOffsets { get; set; }
 
         [JsonProperty("regen")] public float Regen { get; set; }
 
-        [JsonProperty("requiresRelic")] public ItemType? RequiresRelic { get; set; }
+        //[JsonProperty("requiresRelic")] public ItemType? RequiresRelic { get; set; }
 
         [JsonProperty("rerolls")] public float Rerolls { get; set; }
 
@@ -154,7 +147,7 @@ namespace Directers_Assistant.src.DataModels
 
         [JsonProperty("shroud")] public float Shroud { get; set; }
 
-        [JsonProperty("skinLangSheet")] public string? SkinLangSheet { get; set; }
+        //[JsonProperty("skinLangSheet")] public string? SkinLangSheet { get; set; }
 
         [JsonProperty("skins")] public List<SkinObjectModelV1?>? Skins { get; set; }
 

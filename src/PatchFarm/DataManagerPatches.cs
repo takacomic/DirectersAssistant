@@ -103,7 +103,7 @@ namespace Directers_Assistant.src.PatchFarm
                 else
                     continue;
                 GetManager()!.CharacterDict.Add(characterType, characterWrapper);
-                if (character.InternalID == null) character.InternalID = characterType.ToString();
+                character.InternalID ??= characterType.ToString();
                 GetManager()!.CharacterID2Type.Add(character.InternalID, characterType);
             }
         }
