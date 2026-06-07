@@ -12,6 +12,11 @@ namespace Directers_Assistant.src.JsonModels
     [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)]
     internal class CharacterJsonModelV1
     {
+        
+        private static readonly PropertyInfo[] StatModifierProps = typeof(StatModifierJsonModelV1).GetProperties();
+        private static readonly PropertyInfo[] CharacterDataModelProps = typeof(CharacterDataModel).GetProperties();
+        private static readonly PropertyInfo[] MyProps = typeof(CharacterJsonModelV1).GetProperties();
+
         [JsonProperty("isBought")]
         public bool IsBought { get; set; }
 
@@ -134,7 +139,7 @@ namespace Directers_Assistant.src.JsonModels
 
             StatModifierJsonModelV1 stats = StatModifiers![0];
 
-            PropertyInfo[] statsProps = stats.GetType().GetProperties();
+            PropertyInfo[] statsProps = StatModifierProps;
 
             List<string> statsToFloat = new() { "Revivals" };
 
@@ -151,10 +156,10 @@ namespace Directers_Assistant.src.JsonModels
                 var value = prop.GetValue(stats, null);
 
                 c.GetType().GetProperty(prop.Name)!.SetValue(c,
-                    statsToFloat.Contains(prop.Name) ? Convert.ToSingle(value) : value);
+                    statsToFloat.Contains(prop.Name) ?                     Convert.ToSingle(value) : value);
             }
 
-            PropertyInfo[] myProps = GetType().GetProperties();
+            PropertyInfo[] myProps = MyProps;
 
             foreach (PropertyInfo prop in myProps)
             {

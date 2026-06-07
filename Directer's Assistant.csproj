@@ -27,6 +27,14 @@
 
   <ItemGroup>
     <PackageReference Include="NVorbis" Version="0.10.5" />
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.21.0.135717">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="SonarAnalyzer.CSharp.Styling" Version="10.21.0.135717">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

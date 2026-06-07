@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using Directers_Assistant.src.DataModels;
 using Directers_Assistant.src.JsonModels;
+using Directers_Assistant.src.Managers;
 using HarmonyLib;
 using Il2CppVampireSurvivors.Data;
 using Il2CppVampireSurvivors.Framework;
@@ -18,13 +19,17 @@ namespace Directers_Assistant.src.PatchFarm
             [HarmonyPostfix]
             static void InitializeGameSessionPostLoad_Patch(GameManager __instance)
             {
+                CharacterControllerPatches.ClearEquipmentUsed();
+                
                 _GameManager = __instance;
                 CharacterController characterController = __instance.PlayerOne;
                 CharacterType characterType = characterController.CharacterType;
 
                 if (!IsCustomCharacter(characterType)) return;
 
-                CharacterDataModelWrapper modelWrapper = GetManager()!.CharacterDict[characterType];
+                BaseManager? manager = GetManager();
+                if (manager is null) return;
+                if (!manager.CharacterDict.TryGetValue(characterType, out var modelWrapper)) return;
 
                 SkinObjectModelV1 skin = modelWrapper.Skin(_skinType)!;
                 foreach (ArcanaType arcanaType in skin.StartingArcana)

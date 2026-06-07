@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
+using Directers_Assistant.src.Logging;
 using Directers_Assistant.src.Managers;
 using Directers_Assistant.src.PatchFarm;
 using MelonLoader;
@@ -12,7 +13,7 @@ namespace Directers_Assistant.src
         public const string Description = "";
         public const string Author = "Takacomic";
         public const string Company = "CorruptedInfluences";
-        public const string Version = "0.1.4";
+        public const string Version = "0.1.6";
         public const string Download = "https://github.com/takacomic/DirectersMachine/latest";
     }
     internal class DirecterAssistantMod : MelonMod
@@ -24,8 +25,13 @@ namespace Directers_Assistant.src
         internal bool AudioImport = false;
         internal BaseManager? BaseManager;
         internal BasePatch? BasePatch;
+        internal SurvivorLoggerAdapter LoggerAdapter { get; private set; } = null!;
+
         public override void OnInitializeMelon()
         {
+            LoggerAdapter = SurvivorLoggerAdapter.Instance;
+            LoggerAdapter.Initialize();
+
             if (!Directory.Exists(ModDirectory))
             {
                 Directory.CreateDirectory(ModDirectory);
@@ -36,7 +42,8 @@ namespace Directers_Assistant.src
             if (LibCheck("AudioImportLib.dll")) AudioImport = true;
         }
 
-        internal bool LibCheck(string lib)
+        
+        private bool LibCheck(string lib)
         {
             try
             {
@@ -51,11 +58,12 @@ namespace Directers_Assistant.src
             }
             catch (BadImageFormatException)
             {
+                // DLL has wrong architecture (32-bit vs 64-bit mismatch)
                 return false;
             }
             catch (FileLoadException)
             {
-                return true;
+                return false;
             }
         }
     }

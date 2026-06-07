@@ -7,6 +7,7 @@ using Il2CppVampireSurvivors.Objects.Characters;
 using Il2CppVampireSurvivors.Objects;
 using MelonLoader;
 using Newtonsoft.Json;
+using Directers_Assistant.src.Logging;
 using Directers_Assistant.src.Managers;
 
 namespace Directers_Assistant.src.PatchFarm
@@ -20,7 +21,7 @@ namespace Directers_Assistant.src.PatchFarm
             NullValueHandling = NullValueHandling.Ignore
         };
 
-        internal static MelonLogger.Instance GetLogger() => Melon<DirecterAssistantMod>.Logger;
+        internal static SurvivorLoggerAdapter GetLogger() => Melon<DirecterAssistantMod>.Instance.LoggerAdapter;
         internal static BaseManager? GetManager() => Melon<DirecterAssistantMod>.Instance.BaseManager;
         internal static GameManager? _GameManager;
 
@@ -29,12 +30,15 @@ namespace Directers_Assistant.src.PatchFarm
 
         internal static bool IsCustomCharacter(CharacterType characterType)
         {
-            return GetManager()!.CharacterDict.ContainsKey(characterType);
+            BaseManager? manager = GetManager();
+            if (manager is null) return false;
+            return manager.CharacterDict.ContainsKey(characterType);
         }
 
         internal static void HiddenWeaponLeveler(WeaponType weaponType, CharacterController characterController, bool allowMulti = false)
         {
             if (AlreadyHiddenWeapon(weaponType, characterController) && !allowMulti)
+            {
                 foreach (Equipment equipment in characterController.WeaponsManager.HiddenEquipment)
                 {
                     if (equipment.Type != weaponType) continue;
@@ -42,8 +46,13 @@ namespace Directers_Assistant.src.PatchFarm
                     break;
 
                 }
+            }
             else
-                _GameManager!.AddHiddenWeapon(weaponType, characterController, allowMulti);
+            {
+                // Guard against uninitialized GameManager (can happen during early patch calls)
+                if (_GameManager is null) return;
+                _GameManager.AddHiddenWeapon(weaponType, characterController, allowMulti);
+            }
         }
         internal static bool AlreadyHiddenWeapon(WeaponType weaponType, CharacterController characterController)
         {
@@ -53,9 +62,12 @@ namespace Directers_Assistant.src.PatchFarm
             }
             return false;
         }
+        
         internal static void ArcanaAdder(ArcanaType arcanaType)
         {
-            _GameManager!.ArcanaManager.ActiveArcanas.Add(arcanaType);
+            // Guard against uninitialized GameManager
+            if (_GameManager is null) return;
+            _GameManager.ArcanaManager.ActiveArcanas.Add(arcanaType);
             _GameManager.ArcanaManager.TriggerArcana(arcanaType);
         }
     }

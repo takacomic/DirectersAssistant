@@ -23,7 +23,7 @@ namespace Directers_Assistant.src.Managers
         internal static MelonLogger.Instance GetLogger() => Melon<DirecterAssistantMod>.Logger;
         readonly string ZipPath = null!;
         readonly string DataPath = null!;
-        readonly string SavePackPath = null!;
+        private readonly string _savePackPath = null!;
         internal string CharacterPath;
         internal string SpritePath = null!;
         internal string MusicPath = null!;
@@ -40,7 +40,7 @@ namespace Directers_Assistant.src.Managers
         {
             this.ZipPath = ZipPath;
             this.DataPath = DataPath;
-            SavePackPath = Path.Combine(DataPath, "Installed Packs");
+            _savePackPath = Path.Combine(DataPath, "Installed Packs");
             CharacterPath = Path.Combine(DataPath, "Bloodlines");
             SpritePath = Path.Combine(DataPath, "Sprites");
             MusicPath = Path.Combine(DataPath, "Blackdisk");
@@ -56,10 +56,13 @@ namespace Directers_Assistant.src.Managers
                 ParseZipFiles();
                 BaseSuccess = true;
             }
-            catch
+            catch (Exception ex)
             {
+                GetLogger().Error($"Failed to initialize BaseManager: {ex.Message}");
                 BaseSuccess = false;
             }
+            // Initialize sub-managers regardless of success state
+            // This allows partial functionality even if some initialization failed
             SpriteManager = new SpriteManager(SpritePath, _BaseManager);
             MusicManager = new MusicManager(MusicPath, _BaseManager);
             CharacterManager = new CharacterManager(CharacterPath, _BaseManager, SpriteManager);
@@ -71,7 +74,7 @@ namespace Directers_Assistant.src.Managers
 
         void CreateInitDirectories()
         {
-            List<string> directories = new List<string> { SavePackPath, CharacterPath, SpritePath,
+            List<string> directories = new List<string> { _savePackPath, CharacterPath, SpritePath,
                 MusicPath, AlbumPath/*, WeaponPath, ArcanaPath*/ };
 
             foreach (string dir in directories)
@@ -262,21 +265,27 @@ namespace Directers_Assistant.src.Managers
             if (File.Exists(filePath))
             {
                 string fileName = Path.GetFileName(filePath);
-                string newFilePath = GetUnusedName(Path.Combine(SavePackPath, fileName), 0);
+                string newFilePath = GetUnusedName(Path.Combine(_savePackPath, fileName), 0);
 
                 File.Move(filePath, newFilePath);
             }
         }
+        
         string GetUnusedName(string filePath, int level)
         {
+            // If the file doesn't exist, we can use this path
             if (!File.Exists(filePath))
                 return filePath;
 
+            // Insert the level suffix before the extension (e.g., "file.json" -> "file-0.json")
             string newFilePath = filePath.Insert(filePath.Length - 4, "-" + level);
-            if (File.Exists(newFilePath))
-                return newFilePath;
 
-            return GetUnusedName(filePath, level);
+            // If the suffixed version exists, try the next level recursively
+            if (File.Exists(newFilePath))
+                return GetUnusedName(filePath, level + 1);
+
+            // Return the unique suffixed path
+            return newFilePath;
         }
     }
 }
